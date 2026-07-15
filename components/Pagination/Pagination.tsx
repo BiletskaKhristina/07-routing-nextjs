@@ -14,11 +14,14 @@ export default function Pagination({
   currentPage,
   onPageChange,
 }: PaginationProps) {
+  const safePageCount = Math.max(1, Number.isFinite(pageCount) ? pageCount : 1);
+  const forcePage = Math.max(0, Math.min(currentPage - 1, safePageCount - 1));
+
   return (
     <ReactPaginate
       className={css.pagination}
-      pageCount={pageCount}
-      forcePage={currentPage - 1}
+      pageCount={safePageCount}
+      forcePage={forcePage}
       onPageChange={(e) => onPageChange(e.selected + 1)}
       previousLabel="Prev"
       nextLabel="Next"

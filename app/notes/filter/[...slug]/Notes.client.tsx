@@ -79,11 +79,13 @@ export default function NotesClient({ tag }: Props) {
       <NoteList notes={data.notes} />
 
 
-      <Pagination
-        pageCount={data.totalPages}
-        currentPage={page}
-        onPageChange={setPage}
-      />
+      {typeof data.totalPages === 'number' && data.totalPages > 0 && (
+        <Pagination
+          pageCount={data.totalPages}
+          currentPage={Math.min(page, data.totalPages)}
+          onPageChange={(p) => setPage(Math.max(1, Math.min(p, data.totalPages)))}
+        />
+      )}
     </>
   );
 }
