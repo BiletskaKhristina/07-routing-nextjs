@@ -1,89 +1,89 @@
-'use client';
+"use client";
 
-import { useState, useEffect } from 'react';
-import { useQuery } from '@tanstack/react-query';
-import { fetchNotes, type FetchNotesResponse } from '@/lib/api';
+import { useEffect, useState } from "react";
+import { useQuery } from "@tanstack/react-query";
 
-import NoteList from '@/components/NoteList/NoteList';
-import SearchBox from '@/components/SearchBox/SearchBox';
-import Pagination from '@/components/Pagination/Pagination';
-import Modal from '@/components/Modal/Modal';
-import NoteForm from '@/components/NoteForm/NoteForm';
+import { fetchNotes } from "@/lib/api";
 
-type Props = {
-  initialData: FetchNotesResponse;
-  tag: string;
-};
+import SearchBox from "@/components/SearchBox/SearchBox";
+import Pagination from "@/components/Pagination/Pagination";
+import NoteList from "@/components/NoteList/NoteList";
 
-export default function NotesClient({ initialData, tag }: Props) {
-  const [query, setQuery] = useState('');
-  const [debouncedQuery, setDebouncedQuery] = useState('');
+
+interface Props {
+  tag?: string;
+}
+
+
+export default function NotesClient({ tag }: Props) {
   const [page, setPage] = useState(1);
-  const [isOpen, setIsOpen] = useState(false);
+  const [search, setSearch] = useState("");
+  const [debouncedSearch, setDebouncedSearch] = useState("");
+
 
   useEffect(() => {
     const timer = setTimeout(() => {
-      setDebouncedQuery(query);
+      setDebouncedSearch(search);
+      setPage(1);
     }, 500);
 
+
     return () => clearTimeout(timer);
-  }, [query]);
+  }, [search]);
 
-  const { data, isLoading, isError } =
-    useQuery<FetchNotesResponse>({
-      queryKey: ['notes', tag, debouncedQuery, page],
-      queryFn: () => fetchNotes(debouncedQuery, page, tag),
-      initialData,
-      placeholderData: (previous) => previous,
-      select: (data) => ({
-        ...data,
-        notes: data.notes
-          .slice()
-          .sort((a, b) =>
-            new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
-          ),
+
+
+  const {
+    data,
+    isLoading,
+    isError,
+  } = useQuery({
+
+    queryKey: [
+      "notes",
+      tag,
+      debouncedSearch,
+      page,
+    ],
+
+
+    queryFn: () =>
+      fetchNotes({
+        page,
+        search: debouncedSearch,
+        tag,
       }),
-    });
 
-  const handleSearch = (value: string) => {
-    setQuery(value);
-    setPage(1);
-  };
+
+    refetchOnMount: false,
+  });
+
+
 
   if (isLoading) {
-    return <p>Loading, please wait...</p>;
+    return <p>Loading...</p>;
   }
 
-  if (isError) {
-    return <p>Something went wrong.</p>;
+
+  if (isError || !data) {
+    return <p>Something went wrong</p>;
   }
+
+
 
   return (
-    <main>
-      <button
-        type="button"
-        onClick={() => setIsOpen(true)}
-      >
-        Create note
-      </button>
+    <>
+      <SearchBox onSearch={setSearch} />
 
-      <SearchBox onSearch={handleSearch} />
 
-      <NoteList notes={data?.notes ?? []} />
+      <NoteList notes={data.notes} />
 
-      {data && data.totalPages > 1 && (
-        <Pagination
-          pageCount={data.totalPages}
-          currentPage={page}
-          onPageChange={setPage}
-        />
-      )}
 
-      {isOpen && (
-        <Modal onClose={() => setIsOpen(false)}>
-          <NoteForm onClose={() => setIsOpen(false)} />
-        </Modal>
-      )}
-    </main>
+      <Pagination
+        pageCount={data.totalPages}
+        currentPage={page}
+        onPageChange={setPage}
+      />
+    </>
   );
 }
