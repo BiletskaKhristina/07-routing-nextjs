@@ -8,6 +8,8 @@ import { fetchNotes } from "@/lib/api";
 import SearchBox from "@/components/SearchBox/SearchBox";
 import Pagination from "@/components/Pagination/Pagination";
 import NoteList from "@/components/NoteList/NoteList";
+import Modal from "@/components/Modal/Modal";
+import NoteForm from "@/components/NoteForm/NoteForm";
 
 
 interface Props {
@@ -17,20 +19,27 @@ interface Props {
 
 export default function NotesClient({ tag }: Props) {
   const [page, setPage] = useState(1);
+
   const [search, setSearch] = useState("");
   const [debouncedSearch, setDebouncedSearch] = useState("");
+
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
 
   useEffect(() => {
     const timer = setTimeout(() => {
       setDebouncedSearch(search);
-      setPage(1);
     }, 500);
 
 
     return () => clearTimeout(timer);
   }, [search]);
 
+
+  const handleSearch = (value: string) => {
+    setSearch(value);
+    setPage(1);
+  };
 
 
   const {
@@ -73,19 +82,47 @@ export default function NotesClient({ tag }: Props) {
 
   return (
     <>
-      <SearchBox onSearch={setSearch} />
+      <SearchBox onSearch={handleSearch} />
 
 
-      <NoteList notes={data.notes} />
+      <button
+        type="button"
+        onClick={() => setIsModalOpen(true)}
+      >
+        Create note
+      </button>
 
 
-      {typeof data.totalPages === 'number' && data.totalPages > 0 && (
-        <Pagination
-          pageCount={data.totalPages}
-          currentPage={Math.min(page, data.totalPages)}
-          onPageChange={(p) => setPage(Math.max(1, Math.min(p, data.totalPages)))}
-        />
+      {data.notes.length > 0 && (
+        <NoteList notes={data.notes} />
       )}
+
+
+
+      {typeof data.totalPages === "number" &&
+        data.totalPages > 0 && (
+          <Pagination
+            pageCount={data.totalPages}
+            currentPage={Math.min(page, data.totalPages)}
+            onPageChange={(p) =>
+              setPage(
+                Math.max(
+                  1,
+                  Math.min(p, data.totalPages)
+                )
+              )
+            }
+          />
+        )}
+
+
+
+      {isModalOpen && (
+  <Modal onClose={() => setIsModalOpen(false)}>
+    <NoteForm onClose={() => setIsModalOpen(false)} />
+  </Modal>
+)}
+
     </>
   );
 }
