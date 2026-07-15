@@ -4,7 +4,7 @@ import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { useDebouncedCallback } from 'use-debounce';
 
-import { fetchNotes, NotesResponse } from '@/services/noteService';
+import { fetchNotes, NotesResponse } from '../../services/noteService';
 
 import SearchBox from '../SearchBox/SearchBox';
 import NoteList from '../NoteList/NoteList';

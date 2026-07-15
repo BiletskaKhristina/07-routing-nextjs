@@ -4,10 +4,10 @@ import TanStackProvider from '@/components/TanStackProvider/TanStackProvider';
 
 export default function RootLayout({
   children,
-  modal, // 👈 ДОДАЛИ
+  modal, 
 }: {
   children: React.ReactNode;
-  modal: React.ReactNode; // 👈 ДОДАЛИ
+  modal: React.ReactNode; 
 }) {
   return (
     <html lang="en">
