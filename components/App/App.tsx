@@ -25,12 +25,15 @@ export default function App() {
   }, 500);
 
   const { data, isLoading, isError } = useQuery<NotesResponse>({
-    queryKey: ['notes', page, search],
-    queryFn: () => fetchNotes(search, page),
-    placeholderData: (prev) => prev,
-    staleTime: 10000,
-  });
-
+  queryKey: ['notes', page, search],
+  queryFn: () =>
+    fetchNotes({
+      search,
+      page,
+    }),
+  placeholderData: (prev) => prev,
+  staleTime: 10000,
+});
   const notes = data?.notes ?? [];
   const totalPages = data?.totalPages ?? 1;
 
