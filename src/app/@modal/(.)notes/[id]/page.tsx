@@ -4,9 +4,10 @@ import { fetchNoteById } from '@/lib/api';
 export default async function Page({
   params,
 }: {
-  params: { id: string };
+  params: Promise<{ id: string }>;
 }) {
-  const note = await fetchNoteById(params.id);
+  const { id } = await params;
+  const note = await fetchNoteById(id);
 
   return <NotePreviewClient note={note} />;
 }
